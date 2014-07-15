@@ -19,6 +19,7 @@
 
         socket.on("connect", function(data) {
             socketId = socket.io.engine.id;
+            console.log(data)
             runAfterSocketHasConnected();
         });
 
