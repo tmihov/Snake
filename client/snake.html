@@ -79,7 +79,7 @@
 			}
 		}(ctx));
 
-        // add coordinates getter
+        // add coordinates getter -> done
 		var food = (function(ctx) {
 			x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
 			y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
@@ -105,10 +105,18 @@
 				return false;
 			}
 
+            var getCoordinates = function () {
+                return {
+                    'x' : x,
+                    'y' : y
+                }
+            }
+
 			return {
 				print: print,
 				newFood: newFood,
 				isEaten: isEaten,
+                getCoordinates: getCoordinates
 			}
 		}(ctx));
 
