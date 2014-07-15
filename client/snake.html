@@ -16,6 +16,7 @@
 		var canvasWidth = document.getElementById("snake").width;
 		var canvasHeight = document.getElementById("snake").height;
 
+        // make constructor function with arguments: canvas, playerName
 		var snake = (function(ctx) {
 			var body = [];
 			var head = new Tile(4, 0, 10, "green", ctx);
@@ -78,6 +79,7 @@
 			}
 		}(ctx));
 
+        // add coordinates getter
 		var food = (function(ctx) {
 			x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
 			y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
@@ -87,6 +89,8 @@
 				foodTile.print();
 			}
 
+            // add coordinates as arguments
+            // if they're undefined -> new random coordinates
 			var newFood = function() {
 				x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
 				y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
@@ -122,12 +126,27 @@
 			}
 		}
 
+        // open socket connection
+        // and wait for "start"
+        // on "start" create both snakes
 		setInterval(function() {
 			ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 			snake.move();
 			snake.ate();
+
+            // send new direction + is food eaten to server
+            // data : { players : { playerName: direction }, socketId, food }
+            // food.x, food.y
+            // if food is eaten, food will have new coordinates,
+            // else undefined
+            
+            // draw food with corresponding coordinates
 			food.print();
-			snake.print();
+
+			// draw own snake
+            snake.print();
+            // draw other snake
+
 		}, 100);
 		
 		c.addEventListener("keydown", snake.newDirection, true);
