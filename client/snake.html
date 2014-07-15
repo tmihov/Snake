@@ -10,6 +10,15 @@
 	<script src="bower_components/socket.io-client/socket.io.js"></script>
 </head>
 <body>
+    <input type="text" id="playerName" value="Player">
+    <button id="createGame">Create Game</button>
+
+    <br>
+    <input type="text" id="joinGameId">
+    <button id="joinGame">Join Game</button>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <br>
+
 	<canvas id="snake" width="300" height="300" tabindex="1"></canvas>
 	<script type="text/javascript">
 		var c = document.getElementById("snake");
@@ -59,6 +68,14 @@
 				}
 			}
 
+            var getDirection = function () {
+                return direction;
+            }
+
+            var setDirection = function (direction) {
+                this.direction = direction;
+            }
+
 			var newDirection = function(key) {
 				switch(key.keyCode) {
 					case 37: direction = "left";break;
@@ -76,6 +93,8 @@
 				print: print,
 				move: move,
 				newDirection: newDirection,
+                getDirection: getDirection,
+                setDirection: setDirection,
 				ate: ate,
 				isDead: isDead
 			}
@@ -123,7 +142,7 @@
 				newFood: newFood,
 				isEaten: isEaten,
                 getCoordinates: getCoordinates
-			}
+			};
 		}(ctx));
 
 
@@ -155,19 +174,24 @@
             console.log("Connected!");
         });
 
-        // and wait for "start" ->done
-        // on "start" create both snakes ->done
-        socket.on("start", function(data) {
-            console.log("game has started");
-            console.log(data);
-            own = snake(ctx, "own");
-            enemy = snake(ctx, "enemy");
-        });
-        
-		setInterval(function() {
-			ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-			snake.move();
-			snake.ate();
+        var gameLoop = function() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            own.move();
+            own.ate();
+
+            socket.emit("move", {
+                socketId: socketId,
+                direction: own.getDirection(), // TODO add getDirection to snake
+                food: food.getCoordinates(),
+            });
+
+            socket.on("render", function(data) {
+                if (data.socketId !== socketId) {
+                    enemy.setDirection(data.direction) // TODO
+                    food.newFood(data.food)
+                }
+            });
+
 
             // send new direction + is food eaten to server
             // data : { direction, socketId, food }
@@ -176,13 +200,25 @@
             // else undefined
             
             // draw food with corresponding coordinates
-			food.print();
+            food.print();
 
-			// draw own snake
-            snake.print();
+            // draw own snake
+            own.print();
             // draw other snake
+            enemy.print();
 
-		}, 100);
+        };
+        
+        // and wait for "start" ->done
+        // on "start" create both snakes ->done
+        socket.on("start", function(data) {
+            console.log("game has started");
+            console.log(data);
+            own = snake(ctx, "own");
+            enemy = snake(ctx, "enemy");
+            setInterval(gameLoop,100);
+        });
+        
 		
 		c.addEventListener("keydown", snake.newDirection, true);
 	</script>
