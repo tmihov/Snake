@@ -18,11 +18,12 @@
 		var canvasHeight = document.getElementById("snake").height;
 
         // make constructor function with arguments: canvas, playerName
-		var snake = (function(ctx) {
+		var snake = function(ctx, playerName) {
 			var body = [];
 			var head = new Tile(4, 0, 10, "green", ctx);
 			var direction = "right";
 			var grow = false;
+			var playerName = playerName;
 
 			[1, 2, 3].forEach(function(i) {
 				body.push(new Tile(i, 0, 10, "green", ctx));
@@ -78,9 +79,9 @@
 				ate: ate,
 				isDead: isDead
 			}
-		}(ctx));
+		};
 
-        // add coordinates getter
+        // add coordinates getter -> done
 		var food = (function(ctx) {
 			x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
 			y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
@@ -90,12 +91,16 @@
 				foodTile.print();
 			}
 
-            // add coordinates as arguments
-            // if they're undefined -> new random coordinates
-			var newFood = function() {
-				x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
-				y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
-				foodTile = new Tile(x, y, 10, "red", ctx);
+            // add coordinates as arguments -> done
+            // if they're undefined -> new random coordinates -> done
+			var newFood = function(coordinates) {
+                if (coordinates === undefined) {
+				    x = Math.floor((Math.random() * (canvasWidth - 10) / 10) + 1);
+				    y = Math.floor((Math.random() * (canvasHeight - 10) / 10) + 1);
+                    foodTile = new Tile(x, y, 10, "red", ctx);
+                } else {
+				    foodTile = new Tile(coordinates.x, coordinates.y, 10, "red", ctx);
+                }
 			}
 
 			var isEaten = function(xS, yS) {
@@ -106,10 +111,18 @@
 				return false;
 			}
 
+            var getCoordinates = function () {
+                return {
+                    'x' : x,
+                    'y' : y
+                }
+            }
+
 			return {
 				print: print,
 				newFood: newFood,
 				isEaten: isEaten,
+                getCoordinates: getCoordinates
 			}
 		}(ctx));
 
