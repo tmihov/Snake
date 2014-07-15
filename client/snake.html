@@ -169,9 +169,44 @@
 
         window.socket = socket;
 
+        function runAfterSocketHasConnected() {
+            $("#createGame").on("click", function() {
+                $.ajax({
+                    url: "http://burta.hackbulgaria.com:3000/createGame",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        playerName: $("#playerName").val(),
+                        socketId: socketId
+                    })
+                }).done(function(result) {
+                    gameId = result.gameId;
+                    console.log("Game is created with id: ", gameId);
+                });
+            });
+
+            $("#joinGame").on("click", function() {
+                gameId = $("#joinGameId").val();
+                $.ajax({
+                    url: "http://burta.hackbulgaria.com:3000/joinGame",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        playerName: $("#playerName").val(),
+                        socketId: socketId,
+                        gameId: gameId
+                    })
+                }).done(function(result) {
+                    console.log(result);
+                });
+            });
+        }
+
         socket.on("connect", function(data) {
             socketId = socket.io.engine.id;
             console.log("Connected!");
+            runAfterSocketHasConnected();
+
         });
 
         var gameLoop = function() {
