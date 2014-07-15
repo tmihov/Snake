@@ -7,6 +7,7 @@
 		border: 1px solid;
 	}
 	</style>
+	<script src="bower_components/socket.io-client/socket.io.js"></script>
 </head>
 <body>
 	<canvas id="snake" width="300" height="300" tabindex="1"></canvas>
@@ -139,9 +140,30 @@
 			}
 		}
 
-        // open socket connection
-        // and wait for "start"
-        // on "start" create both snakes
+        // open socket connection -> done
+        var
+            socket = new io("http://burta.hackbulgaria.com:3000"),
+            socketId = null,
+            gameId = null;
+
+        var own, enemy; //snakes
+
+        window.socket = socket;
+
+        socket.on("connect", function(data) {
+            socketId = socket.io.engine.id;
+            console.log("Connected!");
+        });
+
+        // and wait for "start" ->done
+        // on "start" create both snakes ->done
+        socket.on("start", function(data) {
+            console.log("game has started");
+            console.log(data);
+            own = snake(ctx, "own");
+            enemy = snake(ctx, "enemy");
+        });
+        
 		setInterval(function() {
 			ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 			snake.move();
