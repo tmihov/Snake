@@ -72,8 +72,8 @@
                 return direction;
             }
 
-            var setDirection = function (direction) {
-                this.direction = direction;
+            var setDirection = function (directionNew) {
+                direction = directionNew;                 //WAS this.direction = direction;
             }
 
 			var newDirection = function(key) {
@@ -216,18 +216,34 @@
 
             socket.emit("move", {
                 socketId: socketId,
+                gameId: gameId,
                 direction: own.getDirection(), // TODO add getDirection to snake
                 food: food.getCoordinates(),
             });
 
+            /*what we receive
+            data
+			{ socketId: 'aicfVi2GUTomQ_PCAAAD',
+			  gameId: 'teo-HWCQH-713',
+			  direction: 'right',
+			  food: { x: 3, y: 24 } }
+			{ socketId: 'HWCQH53gxSP4_HJIAAAC',
+			  gameId: 'teo-HWCQH-713',
+			  direction: 'right',
+			  food: { x: 2, y: 6 } }
+
+			*/
+
             socket.on("render", function(data) {
+            	//console.log("render");
+            	//console.log(data);
                 if (data.socketId !== socketId) {
-                    enemy.setDirection(data.direction) // TODO
-                    food.newFood(data.food)
+                    enemy.setDirection(data.direction); // TODO ->done
+                    food.newFood(data.food);
                 }
             });
 
-
+            enemy.move();
             // send new direction + is food eaten to server
             // data : { direction, socketId, food }
             // food.x, food.y
