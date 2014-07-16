@@ -161,7 +161,7 @@
 
         // open socket connection -> done
         var
-            socket = new io("http://burta.hackbulgaria.com:3000"),
+            socket = new io("http://localhost:3000"), //burta.hackbulgaria.com
             socketId = null,
             gameId = null;
 
@@ -172,7 +172,7 @@
         function runAfterSocketHasConnected() {
             $("#createGame").on("click", function() {
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/createGame",
+                    url: "http://localhost:3000/createGame", //burta.hackbulgaria.com
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -188,7 +188,7 @@
             $("#joinGame").on("click", function() {
                 gameId = $("#joinGameId").val();
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/joinGame",
+                    url: "http://localhost:3000/joinGame", //burta.hackbulgaria.com
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -250,13 +250,10 @@
             console.log("game has started");
             console.log(data);
             own = snake(ctx, "own");
+            c.addEventListener("keydown", own.newDirection, true);
             enemy = snake(ctx, "enemy");
             setInterval(gameLoop,100);
         });
-        
-		
-		c.addEventListener("keydown", snake.newDirection, true);
 	</script>
-	<!--<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>-->
 </body>
 </html>
