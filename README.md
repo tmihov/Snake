@@ -1,5 +1,5 @@
 Multiplayer Snake
 =======
 
-buggy food spawning
-desync
+* buggy food spawning
+* desync
