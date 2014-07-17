@@ -27,15 +27,16 @@
 		var canvasHeight = document.getElementById("snake").height;
 
         // make constructor function with arguments: canvas, playerName
-		var snake = function(ctx, playerName) {
+		var snake = function(ctx, color, playerName) {
 			var body = [];
-			var head = new Tile(4, 0, 10, "green", ctx);
+			var color = color;
+			var head = new Tile(4, 0, 10, color, ctx);
 			var direction = "right";
 			var grow = false;
 			var playerName = playerName;
 
 			[1, 2, 3].forEach(function(i) {
-				body.push(new Tile(i, 0, 10, "green", ctx));
+				body.push(new Tile(i, 0, 10, color, ctx));
 			});
 
 			body.push(head);
@@ -48,10 +49,10 @@
 
 			var move = function() {
 				switch(direction) {
-					case "left": var new_head = new Tile(head.x - 1, head.y , 10, "green", ctx);break;
-					case "up": var new_head = new Tile(head.x, head.y - 1, 10, "green", ctx);break;
-					case "right": var new_head = new Tile(head.x + 1, head.y , 10, "green", ctx);break;
-					case "down": var new_head = new Tile(head.x, head.y + 1 , 10, "green", ctx);break;
+					case "left": var new_head = new Tile(head.x - 1, head.y , 10, color, ctx);break;
+					case "up": var new_head = new Tile(head.x, head.y - 1, 10, color, ctx);break;
+					case "right": var new_head = new Tile(head.x + 1, head.y , 10, color, ctx);break;
+					case "down": var new_head = new Tile(head.x, head.y + 1 , 10, color, ctx);break;
 				}
 				body.push(new_head);
 				head = new_head;
@@ -68,12 +69,20 @@
 				}
 			}
 
+			var getGrow = function() {
+				return grow;
+			}
+
+			var setGrow = function(growNew) {
+				grow = growNew;
+			}
+
             var getDirection = function () {
                 return direction;
             }
 
-            var setDirection = function (direction) {
-                this.direction = direction;
+            var setDirection = function (directionNew) {
+                direction = directionNew;                 //WAS this.direction = direction;
             }
 
 			var newDirection = function(key) {
@@ -95,9 +104,11 @@
 				newDirection: newDirection,
                 getDirection: getDirection,
                 setDirection: setDirection,
+                getGrow: getGrow,
+                setGrow: setGrow,
 				ate: ate,
 				isDead: isDead
-			}
+			};
 		};
 
         // add coordinates getter -> done
@@ -161,7 +172,7 @@
 
         // open socket connection -> done
         var
-            socket = new io("http://burta.hackbulgaria.com:3000"),
+            socket = new io("http://burta.hackbulgaria.com:3000"), //burta.hackbulgaria.com
             socketId = null,
             gameId = null;
 
@@ -172,7 +183,7 @@
         function runAfterSocketHasConnected() {
             $("#createGame").on("click", function() {
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/createGame",
+                    url: "http://burta.hackbulgaria.com:3000/createGame", //burta.hackbulgaria.com
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -188,7 +199,7 @@
             $("#joinGame").on("click", function() {
                 gameId = $("#joinGameId").val();
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/joinGame",
+                    url: "http://burta.hackbulgaria.com:3000/joinGame", //burta.hackbulgaria.com
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -211,23 +222,41 @@
 
         var gameLoop = function() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            own.move();
-            own.ate();
 
             socket.emit("move", {
                 socketId: socketId,
-                direction: own.getDirection(), // TODO add getDirection to snake
+                gameId: gameId,
+                direction: own.getDirection(), // TODO add getDirection to snake,
+                grow: own.getGrow(),
                 food: food.getCoordinates(),
             });
+            own.move();
+            own.ate();
+
+            /*what we receive
+            data
+			{ socketId: 'aicfVi2GUTomQ_PCAAAD',
+			  gameId: 'teo-HWCQH-713',
+			  direction: 'right',
+			  food: { x: 3, y: 24 } }
+			{ socketId: 'HWCQH53gxSP4_HJIAAAC',
+			  gameId: 'teo-HWCQH-713',
+			  direction: 'right',
+			  food: { x: 2, y: 6 } }
+
+			*/
 
             socket.on("render", function(data) {
+            	//console.log("render");
+            	//console.log(data);
                 if (data.socketId !== socketId) {
-                    enemy.setDirection(data.direction) // TODO
-                    food.newFood(data.food)
+                    enemy.setDirection(data.direction); // TODO ->done
+                    enemy.setGrow(data.grow);
                 }
+                    food.newFood(data.food);
             });
 
-
+            enemy.move();
             // send new direction + is food eaten to server
             // data : { direction, socketId, food }
             // food.x, food.y
@@ -249,14 +278,11 @@
         socket.on("start", function(data) {
             console.log("game has started");
             console.log(data);
-            own = snake(ctx, "own");
-            enemy = snake(ctx, "enemy");
-            setInterval(gameLoop,100);
+            own = snake(ctx, "green", "own");
+            c.addEventListener("keydown", own.newDirection, true);
+            enemy = snake(ctx, "orange", "enemy");
+            setInterval(gameLoop, 100);
         });
-        
-		
-		c.addEventListener("keydown", snake.newDirection, true);
 	</script>
-	<!--<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>-->
 </body>
 </html>
