@@ -222,16 +222,16 @@
 
         var gameLoop = function() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            own.move();
-            own.ate();
 
             socket.emit("move", {
                 socketId: socketId,
                 gameId: gameId,
                 direction: own.getDirection(), // TODO add getDirection to snake,
-                grow: own.getGrow,
+                grow: own.getGrow(),
                 food: food.getCoordinates(),
             });
+            own.move();
+            own.ate();
 
             /*what we receive
             data
@@ -281,7 +281,7 @@
             own = snake(ctx, "green", "own");
             c.addEventListener("keydown", own.newDirection, true);
             enemy = snake(ctx, "orange", "enemy");
-            setInterval(gameLoop,1000);
+            setInterval(gameLoop, 100);
         });
 	</script>
 </body>
