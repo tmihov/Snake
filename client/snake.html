@@ -172,7 +172,7 @@
 
         // open socket connection -> done
         var
-            socket = new io("http://burta.hackbulgaria.com:3000"), //burta.hackbulgaria.com
+            socket = new io("http://localhost:3000"),
             socketId = null,
             gameId = null;
 
@@ -183,7 +183,7 @@
         function runAfterSocketHasConnected() {
             $("#createGame").on("click", function() {
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/createGame", //burta.hackbulgaria.com
+                    url: "http://localhost:3000/createGame",
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -199,7 +199,7 @@
             $("#joinGame").on("click", function() {
                 gameId = $("#joinGameId").val();
                 $.ajax({
-                    url: "http://burta.hackbulgaria.com:3000/joinGame", //burta.hackbulgaria.com
+                    url: "http://localhost:3000/joinGame",
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -220,9 +220,12 @@
 
         });
 
+
         var gameLoop = function() {
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
+            own.move();
+            own.ate();
+            
             socket.emit("move", {
                 socketId: socketId,
                 gameId: gameId,
@@ -230,8 +233,6 @@
                 grow: own.getGrow(),
                 food: food.getCoordinates(),
             });
-            own.move();
-            own.ate();
 
             /*what we receive
             data
@@ -270,7 +271,6 @@
             own.print();
             // draw other snake
             enemy.print();
-
         };
         
         // and wait for "start" ->done
