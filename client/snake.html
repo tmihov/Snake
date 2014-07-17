@@ -27,15 +27,16 @@
 		var canvasHeight = document.getElementById("snake").height;
 
         // make constructor function with arguments: canvas, playerName
-		var snake = function(ctx, playerName) {
+		var snake = function(ctx, color, playerName) {
 			var body = [];
-			var head = new Tile(4, 0, 10, "green", ctx);
+			var color = color;
+			var head = new Tile(4, 0, 10, color, ctx);
 			var direction = "right";
 			var grow = false;
 			var playerName = playerName;
 
 			[1, 2, 3].forEach(function(i) {
-				body.push(new Tile(i, 0, 10, "green", ctx));
+				body.push(new Tile(i, 0, 10, color, ctx));
 			});
 
 			body.push(head);
@@ -48,10 +49,10 @@
 
 			var move = function() {
 				switch(direction) {
-					case "left": var new_head = new Tile(head.x - 1, head.y , 10, "green", ctx);break;
-					case "up": var new_head = new Tile(head.x, head.y - 1, 10, "green", ctx);break;
-					case "right": var new_head = new Tile(head.x + 1, head.y , 10, "green", ctx);break;
-					case "down": var new_head = new Tile(head.x, head.y + 1 , 10, "green", ctx);break;
+					case "left": var new_head = new Tile(head.x - 1, head.y , 10, color, ctx);break;
+					case "up": var new_head = new Tile(head.x, head.y - 1, 10, color, ctx);break;
+					case "right": var new_head = new Tile(head.x + 1, head.y , 10, color, ctx);break;
+					case "down": var new_head = new Tile(head.x, head.y + 1 , 10, color, ctx);break;
 				}
 				body.push(new_head);
 				head = new_head;
@@ -66,6 +67,14 @@
 				if(food.isEaten(head.x, head.y) === true) {
 					grow = true;
 				}
+			}
+
+			var getGrow = function() {
+				return grow;
+			}
+
+			var setGrow = function(growNew) {
+				grow = growNew;
 			}
 
             var getDirection = function () {
@@ -95,9 +104,11 @@
 				newDirection: newDirection,
                 getDirection: getDirection,
                 setDirection: setDirection,
+                getGrow: getGrow,
+                setGrow: setGrow,
 				ate: ate,
 				isDead: isDead
-			}
+			};
 		};
 
         // add coordinates getter -> done
@@ -217,7 +228,8 @@
             socket.emit("move", {
                 socketId: socketId,
                 gameId: gameId,
-                direction: own.getDirection(), // TODO add getDirection to snake
+                direction: own.getDirection(), // TODO add getDirection to snake,
+                grow: own.getGrow,
                 food: food.getCoordinates(),
             });
 
@@ -239,8 +251,9 @@
             	//console.log(data);
                 if (data.socketId !== socketId) {
                     enemy.setDirection(data.direction); // TODO ->done
-                    food.newFood(data.food);
+                    enemy.setGrow(data.grow);
                 }
+                    food.newFood(data.food);
             });
 
             enemy.move();
@@ -265,10 +278,10 @@
         socket.on("start", function(data) {
             console.log("game has started");
             console.log(data);
-            own = snake(ctx, "own");
+            own = snake(ctx, "green", "own");
             c.addEventListener("keydown", own.newDirection, true);
-            enemy = snake(ctx, "enemy");
-            setInterval(gameLoop,100);
+            enemy = snake(ctx, "orange", "enemy");
+            setInterval(gameLoop,1000);
         });
 	</script>
 </body>
